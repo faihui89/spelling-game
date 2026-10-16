@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>怪獸進化大胃王 2.0：英文串字大冒險</title>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --secondary: #f59e0b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --purple: #8b5cf6;
+            --text: #1e293b;
+        }
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'PingFang HK', 'Microsoft JhengHei', sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #dbeafe 0%, #fef3c7 50%, #fce7f3 100%);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            color: var(--text);
+            overflow-x: hidden;
+        }
+        .game-container {
+            background: #ffffff;
+            width: 100%;
+            max-width: 650px;
+            border-radius: 28px;
+            padding: 22px;
+            box-shadow: 0 18px 40px rgba(0,0,0,0.12);
+            text-align: center;
+            border: 5px solid #93c5fd;
+            position: relative;
+            z-index: 2;
+        }
+        /* 頂部資訊欄 */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .stats-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .badge {
+            background: #eff6ff;
+            padding: 6px 12px;
+            border-radius: 16px;
+            border: 2px solid #93c5fd;
+            color: #1d4ed8;
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+        .btn-settings {
+            background: #f1f5f9;
+            border: 2px solid #cbd5e1;
+            color: #334155;
+            padding: 6px 14px;
+            border-radius: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-settings:hover {
+            background: #e2e8f0;
+            transform: scale(1.05);
+        }
+
+        /* 過關進度條 */
+        .progress-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .progress-bar {
+            flex-grow: 1;
+            height: 14px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #cbd5e1;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #34d399, #10b981);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        /* 怪獸舞台與進化區 */
+        .monster-stage {
+            background: linear-gradient(180deg, #fefce8 0%, #fef08a 100%);
+            border: 3px dashed #facc15;
+            border-radius: 22px;
+            padding: 16px;
+            margin-bottom: 18px;
+            position: relative;
+        }
+        .evo-badge {
+            display: inline-block;
+            background: var(--purple);
+            color: white;
+            font-size: 0.85rem;
+            font-weight: bold;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-bottom: 6px;
+            box-shadow: 0 3px 0 #6d28d9;
+        }
+        .monster-avatar {
+            font-size: 4.5rem;
+            line-height: 1.1;
+            margin: 5px 0;
+            display: inline-block;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            filter: drop-shadow(0 6px 6px rgba(0,0,0,0.1));
+        }
+        .monster-avatar.bounce {
+            transform: scale(1.35) rotate(10deg);
+        }
+        .speech-bubble {
+            background: white;
+            border: 2px solid #fde047;
+            border-radius: 15px;
+            padding: 4px 12px;
+            font-size: 0.9rem;
+            color: #854d0e;
+            font-weight: bold;
+            max-width: 80%;
+            margin: 0 auto 10px auto;
+        }
+        .clue-box {
+            background: rgba(255,255,255,0.85);
+            border-radius: 16px;
+            padding: 10px;
+            margin-top: 6px;
+        }
+        .clue-emoji {
+            font-size: 2.6rem;
+            line-height: 1;
+        }
+        .clue-text {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #1e293b;
+            margin: 6px 0 10px 0;
+        }
+        .btn-speak {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            font-size: 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 0 #d97706;
+            transition: all 0.1s;
+        }
+        .btn-speak:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        /* 串字格仔區 */
+        .answer-slots {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 18px 0;
+            min-height: 58px;
+        }
+        .slot {
+            width: 48px;
+            height: 56px;
+            border-bottom: 4px solid #94a3b8;
+            background: #f8fafc;
+            border-radius: 12px;
+            font-size: 1.9rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--primary);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .slot.space-slot {
+            background: transparent;
+            border-bottom: none;
+            width: 24px;
+            cursor: default;
+        }
+        .slot.filled {
+            background: #dbeafe;
+            border: 3px solid var(--primary);
+            transform: translateY(-3px);
+        }
+        .slot.correct {
+            background: #d1fae5;
+            border-color: var(--success);
+            color: #065f46;
+            transform: scale(1.08);
+        }
+        .slot.wrong {
+            background: #fee2e2;
+            border-color: var(--danger);
+            color: var(--danger);
+            animation: shake 0.4s;
+        }
+
+        /* 隨機字母池 */
+        .letter-pool {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+            min-height: 65px;
+        }
+        .letter-btn {
+            width: 54px;
+            height: 54px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.7rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #1d4ed8;
+            transition: all 0.1s;
+        }
+        .letter-btn:active {
+            transform: translateY(5px);
+            box-shadow: none;
+        }
+        .letter-btn.used {
+            opacity: 0.18;
+            pointer-events: none;
+            transform: scale(0.85);
+            box-shadow: none;
+        }
+
+        /* 底部輔助按鈕與貼紙簿 */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .btn-action {
+            padding: 9px 16px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-clear { background: #f1f5f9; color: #475569; }
+        .btn-hint { background: #ede9fe; color: #6d28d9; }
+
+        .feedback {
+            min-height: 28px;
+            font-size: 1.15rem;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .sticker-book {
+            margin-top: 18px;
+            padding-top: 12px;
+            border-top: 2px dashed #e2e8f0;
+            font-size: 0.95rem;
+            color: #64748b;
+        }
+        .sticker-list {
+            font-size: 1.8rem;
+            letter-spacing: 6px;
+            margin-top: 4px;
+            min-height: 35px;
+        }
+
+        /* 字庫管理彈出視窗 (Modal) */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.65);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            padding: 15px;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-box {
+            background: white;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            border-radius: 24px;
+            padding: 22px;
+            overflow-y: auto;
+            text-align: left;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 12px;
+            margin-bottom: 15px;
+        }
+        .word-list-editor {
+            max-height: 240px;
+            overflow-y: auto;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+        .word-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 10px;
+            border-bottom: 1px solid #f1f5f9;
+            gap: 8px;
+        }
+        .word-item:last-child { border-bottom: none; }
+        .btn-del {
+            background: #fee2e2;
+            color: #dc2626;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .add-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr 80px auto;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .add-form input, .bulk-area {
+            padding: 9px 12px;
+            border: 2px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            user-select: text;
+        }
+        .bulk-area {
+            width: 100%;
+            height: 90px;
+            margin-top: 6px;
+            font-family: monospace;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 9px 16px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .btn-success {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1.05rem;
+            margin-top: 10px;
+        }
+
+        /* 彩紙特效 */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            top: -10px;
+            z-index: 99;
+            animation: fall linear forwards;
+        }
+        @keyframes fall {
+            to { transform: translateY(105vh) rotate(720deg); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+        @media (max-width: 520px) {
+            .add-form { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container" id="main-game">
+    <!-- 頂部狀態與字庫按鈕 -->
+    <div class="top-bar">
+        <div class="stats-group">
+            <div class="badge" id="level-info">第 1 / 8 關</div>
+            <div class="badge" id="combo-info">🔥 連擊: 0</div>
+            <div class="badge" id="score-info">⭐ 0</div>
+        </div>
+        <button class="btn-settings" onclick="openEditor()">⚙️ 管理默書字庫</button>
+    </div>
+
+    <!-- 過關進度條 -->
+    <div class="progress-wrapper">
+        <span style="font-size: 0.85rem; font-weight: bold; color: #64748b;">進化進度</span>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+    </div>
+
+    <!-- 怪獸育成舞台 -->
+    <div class="monster-stage">
+        <div class="evo-badge" id="evo-title">LV.1 神秘怪獸蛋</div>
+        <div>
+            <div class="monster-avatar" id="monster">🥚</div>
+        </div>
+        <div class="speech-bubble" id="monster-speech">「我好肚餓呀，快啲餵我食生字啦！」</div>
+
+        <div class="clue-box">
+            <div class="clue-emoji" id="clue-emoji">🍎</div>
+            <div class="clue-text" id="clue-text">紅卜卜嘅生果 (蘋果)</div>
+            <button class="btn-speak" onclick="speakCurrentWord()">🔊 聽讀音</button>
+        </div>
+    </div>
+
+    <!-- 串字空格 -->
+    <div class="answer-slots" id="answer-slots"></div>
+
+    <!-- 字母按鈕池 -->
+    <div class="letter-pool" id="letter-pool"></div>
+
+    <!-- 輔助控制 -->
+    <div class="controls">
+        <button class="btn-action btn-clear" onclick="resetCurrentWord()">🔄 重新拼過</button>
+        <button class="btn-action btn-hint" onclick="giveHint()">💡 提示一粒字 (-5分)</button>
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+
+    <!-- 怪獸貼紙收集冊 -->
+    <div class="sticker-book">
+        <div>🏅 <strong>我嘅過關怪獸貼紙簿：</strong>（每爆機一次隨機送一隻！）</div>
+        <div class="sticker-list" id="sticker-list">未有貼紙，快啲完成第一場挑戰啦！</div>
+    </div>
+</div>
+
+<!-- ⚙️ 字庫管理彈出視窗 -->
+<div class="modal-overlay" id="editor-modal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2 style="margin:0; color:#1e293b;">📚 管理默書字庫</h2>
+            <button class="btn-del" style="background:#f1f5f9; color:#334155;" onclick="closeEditor()">✖ 關閉</button>
+        </div>
+
+        <p style="margin: 0 0 8px 0; font-size: 0.9rem; color: #475569;">
+            <strong>1. 逐個生字加入：</strong>
+        </p>
+        <div class="add-form">
+            <input type="text" id="new-word" placeholder="英文生字 (如: apple)">
+            <input type="text" id="new-hint" placeholder="中文提示 (如: 蘋果)">
+            <input type="text" id="new-emoji" placeholder="圖案 🍎">
+            <button class="btn-primary" onclick="addSingleWord()">＋ 加入</button>
+        </div>
+
+        <p style="margin: 0 0 6px 0; font-size: 0.9rem; color: #475569;">
+            <strong>2. 目前字庫清單 (<span id="word-count">0</span> 個字)：</strong>
+        </p>
+        <div class="word-list-editor" id="word-list-editor"></div>
+
+        <details style="margin-bottom: 12px; background: #f8fafc; padding: 10px; border-radius: 12px; border: 1px solid #e2e8f0;">
+            <summary style="cursor: pointer; font-weight: bold; color: #1d4ed8;">⚡ 批量快速匯入（支援由 Google Sheets / Excel 貼上）</summary>
+            <p style="font-size: 0.85rem; color: #64748b; margin: 6px 0;">
+                每行一個生字，格式：<code>英文, 中文提示, Emoji(可不填)</code>
+            </p>
+            <textarea class="bulk-area" id="bulk-input" placeholder="playground, 遊樂場, 🛝&#10;strawberry, 士多啤梨, 🍓&#10;dictionary, 字典, 📖"></textarea>
+            <button class="btn-primary" style="margin-top: 6px; width: 100%;" onclick="importBulkWords()">📥 確認批量匯入（會加落現有字庫）</button>
+        </details>
+
+        <div style="display: flex; gap: 10px;">
+            <button class="btn-action btn-clear" style="flex:1;" onclick="restoreDefaultWords()">🔄 還原預設小學字庫</button>
+            <button class="btn-action" style="flex:1; background:#fee2e2; color:#dc2626;" onclick="clearAllWords()">🗑️ 清空全部</button>
+        </div>
+
+        <button class="btn-success" onclick="saveAndRestart()">✅ 儲存字庫並開始新遊戲！</button>
+    </div>
+</div>
+
+<script>
+    // 預設生字庫
+    const defaultWords = [
+        { word: "apple", hint: "紅卜卜嘅生果 (蘋果)", emoji: "🍎" },
+        { word: "school", hint: "每日返學嘅地方 (學校)", emoji: "🏫" },
+        { word: "friend", hint: "一齊玩嘅好同伴 (朋友)", emoji: "🤝" },
+        { word: "family", hint: "爸爸媽媽同埋我 (家庭)", emoji: "👨‍👩‍👦‍👦" },
+        { word: "library", hint: "好安靜、借書睇嘅地方 (圖書館)", emoji: "📚" },
+        { word: "umbrella", hint: "落雨出街要擔住佢 (雨傘)", emoji: "☂️" },
+        { word: "elephant", hint: "長鼻子嘅巨型動物 (大象)", emoji: "🐘" },
+        { word: "breakfast", hint: "朝早起身食嘅第一餐 (早餐)", emoji: "🥞" }
+    ];
+
+    // 怪獸進化階段設定
+    const evolutionStages = [
+        { minRatio: 0,    icon: "🥚", title: "LV.1 神秘怪獸蛋", speech: "「我好肚餓呀，快啲餵我食生字啦！」" },
+        { minRatio: 0.25, icon: "🐣", title: "LV.2 破殼小萌獸", speech: "「咔嚓！我出世喇，啲生字好好味呀！」" },
+        { minRatio: 0.5,  icon: "🦖", title: "LV.3 火焰小暴龍", speech: "「吼！！我開始充滿力量喇，繼續餵我！」" },
+        { minRatio: 0.75, icon: "🐉", title: "LV.4 終極神龍王", speech: "「太強喇！爭少少就完成終極進化喇！」" }
+    ];
+
+    const rewardStickers = ["🦄", "🐲", "🦊", "🦁", "🐳", "🦉", "🦋", "👑", "🚀", "💎"];
+
+    // 讀取或初始化本地儲存字庫與貼紙
+    let wordList = JSON.parse(localStorage.getItem("customSpellingWords_v2")) || [...defaultWords];
+    let myStickers = JSON.parse(localStorage.getItem("monsterStickers_v2")) || [];
+
+    let currentIndex = 0;
+    let score = 0;
+    let combo = 0;
+    let currentGuess = [];
+    let shuffledLetters = [];
+    let lastEvoLevel = 0;
+
+    // 音效系統 (Web Audio API，免外部檔案)
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+
+    function playSound(type) {
+        try {
+            if (!audioCtx) audioCtx = new AudioCtx();
+            const now = audioCtx.currentTime;
+
+            if (type === 'pop') {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.frequency.setValueAtTime(520, now);
+                osc.frequency.exponentialRampToValueAtTime(880, now + 0.08);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.08);
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(now); osc.stop(now + 0.08);
+            } else if (type === 'correct') {
+                [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+                    gain.gain.setValueAtTime(0.2, now + idx * 0.08);
+                    gain.gain.linearRampToValueAtTime(0.01, now + idx * 0.08 + 0.2);
+                    osc.connect(gain); gain.connect(audioCtx.destination);
+                    osc.start(now + idx * 0.08); osc.stop(now + idx * 0.08 + 0.2);
+                });
+            } else if (type === 'wrong') {
+                [220, 180].forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.15);
+                    gain.gain.setValueAtTime(0.15, now + idx * 0.15);
+                    gain.gain.linearRampToValueAtTime(0.01, now + idx * 0.15 + 0.18);
+                    osc.connect(gain); gain.connect(audioCtx.destination);
+                    osc.start(now + idx * 0.15); osc.stop(now + idx * 0.15 + 0.18);
+                });
+            }
+        } catch (e) {}
+    }
+
+    function initGame() {
+        if (wordList.length === 0) {
+            wordList = [...defaultWords];
+        }
+        currentIndex = 0;
+        score = 0;
+        combo = 0;
+        lastEvoLevel = 0;
+        renderStickers();
+        updateScoreBoard();
+        loadWord();
+    }
+
+    function updateMonsterEvolution() {
+        const ratio = currentIndex / wordList.length;
+        let stage = evolutionStages[0];
+        let stageIdx = 0;
+        evolutionStages.forEach((s, idx) => {
+            if (ratio >= s.minRatio) {
+                stage = s;
+                stageIdx = idx;
+            }
+        });
+
+        const monsterEl = document.getElementById("monster");
+        document.getElementById("evo-title").innerText = stage.title;
+        monsterEl.innerText = stage.icon;
+        document.getElementById("monster-speech").innerText = stage.speech;
+
+        // 如果剛剛升級進化，噴少少彩紙慶祝
+        if (stageIdx > lastEvoLevel) {
+            lastEvoLevel = stageIdx;
+            document.getElementById("monster-speech").innerText = `✨ 哇！我進化成【${stage.title}】喇！多謝你！`;
+            launchConfetti(25);
+        }
+    }
+
+    function loadWord() {
+        const currentData = wordList[currentIndex];
+        const targetWord = currentData.word.toLowerCase().trim();
+        
+        // 處理中間有空格嘅片語 (例如 in front of)
+        currentGuess = targetWord.split('').map(ch => ch === ' ' ? { char: ' ', isSpace: true } : null);
+
+        document.getElementById("level-info").innerText = `第 ${currentIndex + 1} / ${wordList.length} 關`;
+        document.getElementById("progress-fill").style.width = `${(currentIndex / wordList.length) * 100}%`;
+        document.getElementById("clue-emoji").innerText = currentData.emoji || "🌟";
+        document.getElementById("clue-text").innerText = currentData.hint || "聽讀音串出正確生字";
+        document.getElementById("feedback").innerText = "";
+
+        updateMonsterEvolution();
+
+        // 只抽非空格字母放入字母池
+        shuffledLetters = [];
+        targetWord.split('').forEach((char, index) => {
+            if (char !== ' ') {
+                shuffledLetters.push({ char: char, id: index, used: false });
+            }
+        });
+
+        for (let i = shuffledLetters.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffledLetters[i], shuffledLetters[j]] = [shuffledLetters[j], shuffledLetters[i]];
+        }
+
+        renderSlots();
+        renderPool();
+        setTimeout(() => speakCurrentWord(), 400);
+    }
+
+    function renderSlots() {
+        const slotsContainer = document.getElementById("answer-slots");
+        slotsContainer.innerHTML = "";
+
+        currentGuess.forEach((item, slotIdx) => {
+            const slot = document.createElement("div");
+            if (item && item.isSpace) {
+                slot.className = "slot space-slot";
+            } else {
+                slot.className = "slot" + (item ? " filled" : "");
+                slot.innerText = item ? item.char : "";
+                slot.onclick = () => {
+                    if (item && !item.isSpace) {
+                        playSound('pop');
+                        const found = shuffledLetters.find(l => l.id === item.id);
+                        if (found) found.used = false;
+                        currentGuess[slotIdx] = null;
+                        document.getElementById("feedback").innerText = "";
+                        renderSlots();
+                        renderPool();
+                    }
+                };
+            }
+            slotsContainer.appendChild(slot);
+        });
+    }
+
+    function renderPool() {
+        const poolContainer = document.getElementById("letter-pool");
+        poolContainer.innerHTML = "";
+
+        shuffledLetters.forEach((item) => {
+            const btn = document.createElement("button");
+            btn.className = "letter-btn" + (item.used ? " used" : "");
+            btn.innerText = item.char;
+            btn.onclick = () => selectLetter(item);
+            poolContainer.appendChild(btn);
+        });
+    }
+
+    function selectLetter(letterObj) {
+        const emptyIndex = currentGuess.findIndex(val => val === null);
+        if (emptyIndex !== -1) {
+            playSound('pop');
+            letterObj.used = true;
+            currentGuess[emptyIndex] = letterObj;
+            renderSlots();
+            renderPool();
+
+            if (currentGuess.every(val => val !== null)) {
+                checkAnswer();
+            }
+        }
+    }
+
+    function checkAnswer() {
+        const targetWord = wordList[currentIndex].word.toLowerCase().trim();
+        const guessedWord = currentGuess.map(item => item.char).join('');
+        const slots = document.querySelectorAll(".slot:not(.space-slot)");
+        const feedback = document.getElementById("feedback");
+        const monster = document.getElementById("monster");
+
+        if (guessedWord === targetWord) {
+            playSound('correct');
+            combo++;
+            const earned = 10 + (combo * 3);
+            score += earned;
+            updateScoreBoard();
+
+            slots.forEach(s => s.classList.add("correct"));
+            feedback.style.color = "#10b981";
+            feedback.innerText = `🎉 串啱咗！怪獸好鍾意食！ (+${earned}分)`;
+
+            monster.classList.add("bounce");
+            monster.innerText = "😋";
+            speakCurrentWord();
+
+            setTimeout(() => {
+                monster.classList.remove("bounce");
+                nextWord();
+            }, 1500);
+        } else {
+            playSound('wrong');
+            combo = 0;
+            updateScoreBoard();
+            slots.forEach(s => s.classList.add("wrong"));
+            feedback.style.color = "#ef4444";
+            feedback.innerText = "🙈 哎呀，有啲字母擺錯位，再試下！";
+            monster.innerText = "😵";
+
+            setTimeout(() => {
+                resetCurrentWord();
+                updateMonsterEvolution();
+            }, 1000);
+        }
+    }
+
+    function resetCurrentWord() {
+        const targetWord = wordList[currentIndex].word.toLowerCase().trim();
+        shuffledLetters.forEach(l => l.used = false);
+        currentGuess = targetWord.split('').map(ch => ch === ' ' ? { char: ' ', isSpace: true } : null);
+        document.getElementById("feedback").innerText = "";
+        renderSlots();
+        renderPool();
+    }
+
+    function giveHint() {
+        const targetWord = wordList[currentIndex].word.toLowerCase().trim();
+        const emptyIdx = currentGuess.findIndex((item, idx) => !item || (!item.isSpace && item.char !== targetWord[idx]));
+
+        if (emptyIdx !== -1) {
+            if (currentGuess[emptyIdx] && !currentGuess[emptyIdx].isSpace) {
+                shuffledLetters.find(l => l.id === currentGuess[emptyIdx].id).used = false;
+            }
+            const neededChar = targetWord[emptyIdx];
+            const matchLetter = shuffledLetters.find(l => !l.used && l.char === neededChar);
+
+            if (matchLetter) {
+                playSound('pop');
+                score = Math.max(0, score - 5);
+                updateScoreBoard();
+                matchLetter.used = true;
+                currentGuess[emptyIdx] = matchLetter;
+                renderSlots();
+                renderPool();
+
+                if (currentGuess.every(val => val !== null)) {
+                    checkAnswer();
+                }
+            }
+        }
+    }
+
+    function nextWord() {
+        currentIndex++;
+        if (currentIndex < wordList.length) {
+            loadWord();
+        } else {
+            showVictory();
+        }
+    }
+
+    function showVictory() {
+        document.getElementById("progress-fill").style.width = "100%";
+        launchConfetti(70);
+
+        // 隨機抽一張新貼紙
+        const newSticker = rewardStickers[Math.floor(Math.random() * rewardStickers.length)];
+        myStickers.push(newSticker);
+        localStorage.setItem("monsterStickers_v2", JSON.stringify(myStickers));
+
+        const stage = document.querySelector(".monster-stage");
+        stage.innerHTML = `
+            <div style="font-size: 4.5rem;">👑🐉🏆</div>
+            <h2 style="color: #1d4ed8; margin: 8px 0;">爆機大成功！神龍進化完成！</h2>
+            <p style="font-size: 1.3rem; font-weight: bold; color: #10b981; margin: 6px 0;">總分：${score} 分</p>
+            <div style="background: white; border-radius: 16px; padding: 12px; margin: 12px auto; max-width: 320px; border: 2px solid #facc15;">
+                🎁 獲得新貼紙獎勵：<span style="font-size: 2.2rem;">${newSticker}</span>
+            </div>
+            <button class="btn-speak" style="font-size: 1.15rem; padding: 12px 28px; margin-top: 8px;" onclick="location.reload()">🔄 再玩一局儲貼紙</button>
+        `;
+        document.getElementById("answer-slots").innerHTML = "";
+        document.getElementById("letter-pool").innerHTML = "";
+        document.getElementById("feedback").innerText = "";
+        renderStickers();
+    }
+
+    function renderStickers() {
+        const listEl = document.getElementById("sticker-list");
+        if (myStickers.length === 0) {
+            listEl.innerText = "（未有貼紙，快啲完成第一場挑戰啦！）";
+            listEl.style.fontSize = "0.95rem";
+        } else {
+            listEl.style.fontSize = "1.8rem";
+            listEl.innerText = myStickers.join(" ");
+        }
+    }
+
+    function updateScoreBoard() {
+        document.getElementById("score-info").innerText = `⭐ ${score}`;
+        document.getElementById("combo-info").innerText = `🔥 連擊: ${combo}`;
+    }
+
+    function speakCurrentWord() {
+        if ('speechSynthesis' in window && wordList[currentIndex]) {
+            const word = wordList[currentIndex].word;
+            const utterance = new SpeechSynthesisUtterance(word);
+            utterance.lang = 'en-GB';
+            utterance.rate = 0.85;
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+
+    function launchConfetti(count) {
+        const colors = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
+        for (let i = 0; i < count; i++) {
+            const conf = document.createElement('div');
+            conf.className = 'confetti';
+            conf.style.left = Math.random() * 100 + 'vw';
+            conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            conf.style.animationDuration = (Math.random() * 2 + 1.5) + 's';
+            document.body.appendChild(conf);
+            setTimeout(() => conf.remove(), 3500);
+        }
+    }
+
+    // ==========================================
+    // 🛠️ 字庫管理介面邏輯
+    // ==========================================
+    function openEditor() {
+        renderEditorList();
+        document.getElementById("editor-modal").classList.add("active");
+    }
+
+    function closeEditor() {
+        document.getElementById("editor-modal").classList.remove("active");
+    }
+
+    function renderEditorList() {
+        const container = document.getElementById("word-list-editor");
+        document.getElementById("word-count").innerText = wordList.length;
+        container.innerHTML = "";
+
+        if (wordList.length === 0) {
+            container.innerHTML = `<div style="text-align:center; color:#94a3b8; padding: 20px;">字庫而家係吉嘅，快啲加幾個生字啦！</div>`;
+            return;
+        }
+
+        wordList.forEach((item, idx) => {
+            const row = document.createElement("div");
+            row.className = "word-item";
+            row.innerHTML = `
+                <div>
+                    <span style="font-size:1.3rem; margin-right:6px;">${item.emoji || "🌟"}</span>
+                    <strong style="color:#1d4ed8; font-size:1.05rem;">${item.word}</strong>
+                    <span style="color:#64748b; font-size:0.9rem; margin-left:8px;">${item.hint}</span>
+                </div>
+                <button class="btn-del" onclick="deleteWord(${idx})">刪除</button>
+            `;
+            container.appendChild(row);
+        });
+    }
+
+    function addSingleWord() {
+        const w = document.getElementById("new-word").value.trim();
+        const h = document.getElementById("new-hint").value.trim();
+        const e = document.getElementById("new-emoji").value.trim() || "🌟";
+
+        if (!w) {
+            alert("請輸入英文生字！");
+            return;
+        }
+        wordList.push({ word: w, hint: h || "請串出呢個生字", emoji: e });
+        document.getElementById("new-word").value = "";
+        document.getElementById("new-hint").value = "";
+        document.getElementById("new-emoji").value = "";
+        renderEditorList();
+    }
+
+    function deleteWord(idx) {
+        wordList.splice(idx, 1);
+        renderEditorList();
+    }
+
+    function importBulkWords() {
+        const raw = document.getElementById("bulk-input").value.trim();
+        if (!raw) return;
+
+        const lines = raw.split('\n');
+        let added = 0;
+        lines.forEach(line => {
+            // 支援逗號或者 Tab (Excel 直接複製貼上)
+            const parts = line.includes('\t') ? line.split('\t') : line.split(',');
+            if (parts.length >= 1 && parts[0].trim() !== "") {
+                const word = parts[0].trim();
+                const hint = (parts[1] && parts[1].trim()) ? parts[1].trim() : "聽讀音串字";
+                const emoji = (parts[2] && parts[2].trim()) ? parts[2].trim() : "🌟";
+                wordList.push({ word, hint, emoji });
+                added++;
+            }
+        });
+
+        document.getElementById("bulk-input").value = "";
+        renderEditorList();
+        alert(`成功匯入咗 ${added} 個生字！記得撳最底嘅「儲存字庫」掣呀！`);
+    }
+
+    function restoreDefaultWords() {
+        if (confirm("確定要還原做預設嘅 8 個小學生字嗎？")) {
+            wordList = [...defaultWords];
+            renderEditorList();
+        }
+    }
+
+    function clearAllWords() {
+        if (confirm("確定要清空晒目前所有生字嗎？")) {
+            wordList = [];
+            renderEditorList();
+        }
+    }
+
+    function saveAndRestart() {
+        if (wordList.length === 0) {
+            alert("字庫至少要有 1 個生字先可以開始遊戲呀！");
+            return;
+        }
+        localStorage.setItem("customSpellingWords_v2", JSON.stringify(wordList));
+        closeEditor();
+        location.reload();
+    }
+
+    // 啟動遊戲
+    initGame();
+</script>
+
+</body>
+</html>
